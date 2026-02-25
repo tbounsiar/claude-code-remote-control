@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.claudecoderemotecontrol.app",
+      "bundleIdentifier": "com.tbsoft.clauderemote",
       "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "Camera is used to scan QR codes from claude remote-control sessions"
@@ -26,9 +26,14 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F0F0F"
       },
-      "package": "com.claudecoderemotecontrol.app",
+      "package": "com.tbsoft.clauderemote",
       "versionCode": 1,
-      "permissions": ["CAMERA", "VIBRATE"],
+      "permissions": [
+        "CAMERA",
+        "VIBRATE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
       "edgeToEdgeEnabled": true,
       "intentFilters": [
         {
@@ -41,7 +46,10 @@
               "pathPrefix": "/code"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -67,8 +75,10 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID_HERE"
-      }
-    }
+        "projectId": "d32c5ffe-aef9-4716-8064-77e0be5c069f"
+      },
+      "router": {}
+    },
+    "owner": "tbounsiar"
   }
 }
