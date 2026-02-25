@@ -5,15 +5,7 @@ import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../hooks/useTheme';
 import { addSession } from '../lib/storage';
-
-function isValidClaudeUrl(raw: string): boolean {
-  try {
-    const parsed = new URL(raw);
-    return parsed.hostname === 'claude.ai' || parsed.hostname.endsWith('.claude.ai');
-  } catch {
-    return false;
-  }
-}
+import { isValidClaudeUrl } from '../lib/constants';
 
 export default function ScannerScreen() {
   const [permission, requestPermission] = useCameraPermissions();

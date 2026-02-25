@@ -9,7 +9,7 @@ import {
   INJECTED_JS_AFTER_LOAD,
   DARK_MODE_CSS_INJECTION,
 } from '../lib/injectedJS';
-import { CLAUDE_DOMAIN, ANTHROPIC_DOMAIN } from '../lib/constants';
+import { isAllowedHost, isGoogleAuthHost } from '../lib/constants';
 import { LoadingOverlay } from './LoadingOverlay';
 
 const DEFAULT_USER_AGENT = Platform.select({
@@ -75,24 +75,29 @@ export function WebViewSession({ url }: Props) {
     [url]
   );
 
+  const getHostname = (rawUrl: string): string | null => {
+    try {
+      return new URL(rawUrl).hostname;
+    } catch {
+      return null;
+    }
+  };
+
   const handleShouldStartLoad = useCallback(
     (request: { url: string }) => {
       const { url: reqUrl } = request;
+      if (reqUrl.startsWith('about:')) return true;
+
+      const hostname = getHostname(reqUrl);
+      if (!hostname) return false;
+
       // Google blocks OAuth in embedded WebViews — open in system browser
-      if (
-        reqUrl.includes('accounts.google.com') ||
-        reqUrl.includes('google.com/oauth') ||
-        reqUrl.includes('oauth2/auth')
-      ) {
+      if (isGoogleAuthHost(hostname)) {
         RNLinking.openURL(reqUrl);
         return false;
       }
       // Allow Claude/Anthropic domains, block everything else
-      if (
-        reqUrl.includes(CLAUDE_DOMAIN) ||
-        reqUrl.includes(ANTHROPIC_DOMAIN) ||
-        reqUrl.startsWith('about:')
-      ) {
+      if (isAllowedHost(hostname)) {
         return true;
       }
       RNLinking.openURL(reqUrl);
@@ -104,12 +109,10 @@ export function WebViewSession({ url }: Props) {
   const handleNavigationStateChange = useCallback(
     (navState: WebViewNavigation) => {
       const navUrl = navState.url || '';
-      if (
-        navUrl &&
-        !navUrl.includes(CLAUDE_DOMAIN) &&
-        !navUrl.includes(ANTHROPIC_DOMAIN) &&
-        !navUrl.startsWith('about:')
-      ) {
+      if (!navUrl || navUrl.startsWith('about:')) return;
+
+      const hostname = getHostname(navUrl);
+      if (hostname && !isAllowedHost(hostname)) {
         webViewRef.current?.stopLoading();
         RNLinking.openURL(navUrl);
       }

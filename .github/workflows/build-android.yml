@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -34,19 +34,22 @@ jobs:
       - name: Expo prebuild
         run: npx expo prebuild --platform android --clean
 
+      - name: Verify prebuild output
+        run: |
+          test -f android/app/build.gradle || { echo "ERROR: expo prebuild failed"; exit 1; }
+
       - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+          test -s android/app/release.keystore || (echo "ERROR: keystore decode failed" && exit 1)
 
       - name: Configure release signing
         run: |
-          # Patch build.gradle to use release keystore
           cat > /tmp/signing-patch.py << 'PYEOF'
-          import re, sys
           path = "android/app/build.gradle"
           with open(path) as f:
               content = f.read()
 
-          # Add release signing config
           release_config = """
           release {
               storeFile file('release.keystore')
@@ -55,13 +58,11 @@ jobs:
               keyPassword System.getenv('KEY_PASSWORD') ?: ''
           }"""
 
-          # Insert release config after debug config block
           content = content.replace(
               "        }\n    }\n    buildTypes {",
               "        }\n" + release_config + "\n    }\n    buildTypes {"
           )
 
-          # Use release signing for release builds
           content = content.replace(
               "signingConfig signingConfigs.debug\n            def enableShrinkResources",
               "signingConfig signingConfigs.release\n            def enableShrinkResources"
@@ -69,9 +70,11 @@ jobs:
 
           with open(path, 'w') as f:
               f.write(content)
-          print("Signing config patched successfully")
           PYEOF
           python3 /tmp/signing-patch.py
+          # Verify the patch was applied
+          grep -q 'signingConfigs.release' android/app/build.gradle || (echo "ERROR: signing patch failed — build.gradle not patched" && exit 1)
+          echo "Signing config patched and verified"
 
       - name: Build release AAB
         working-directory: android
@@ -100,6 +103,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG=${GITHUB_REF#refs/tags/}
+          # Delete existing release if re-running on same tag
+          gh release delete ${TAG} --yes 2>/dev/null || true
           gh release create ${TAG} \
             claude-code-remote-control-${TAG}.apk \
             claude-code-remote-control-${TAG}.aab \

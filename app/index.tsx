@@ -16,7 +16,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useSessions } from '../hooks/useSessions';
 import { SessionCard } from '../components/SessionCard';
 import { EmptyState } from '../components/EmptyState';
-import { CLAUDE_BASE_URL } from '../lib/constants';
+import { CLAUDE_BASE_URL, isValidClaudeUrl } from '../lib/constants';
 import type { Session } from '../lib/storage';
 
 export default function HomeScreen() {
@@ -55,7 +55,7 @@ export default function HomeScreen() {
     const url = urlInput.trim();
     if (!url) return;
 
-    const sessionUrl = url.includes('claude.ai') ? url : `${CLAUDE_BASE_URL}/${url}`;
+    const sessionUrl = isValidClaudeUrl(url) ? url : `${CLAUDE_BASE_URL}/${url}`;
     await addSession({ url: sessionUrl, addedAt: Date.now() });
     setUrlInput('');
     setUrlModalVisible(false);
