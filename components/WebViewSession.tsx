@@ -1,6 +1,7 @@
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, AppState, Linking as RNLinking, Platform } from 'react-native';
 import { WebView, type WebViewMessageEvent, type WebViewNavigation } from 'react-native-webview';
+import * as WebBrowser from 'expo-web-browser';
 import { useTheme } from '../hooks/useTheme';
 import { notifySessionEvent } from '../lib/notifications';
 import { mergeSessions } from '../lib/storage';
@@ -35,7 +36,7 @@ export function WebViewSession({ url }: Props) {
   const lastNotifyRef = useRef<number>(0);
   const pendingAuthRef = useRef(false);
 
-  // Reload WebView when user returns from system browser after OAuth
+  // Reload WebView when user returns from Chrome Custom Tab after OAuth
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active' && pendingAuthRef.current) {
@@ -103,10 +104,13 @@ export function WebViewSession({ url }: Props) {
       const hostname = getHostname(reqUrl);
       if (!hostname) return false;
 
-      // Google blocks OAuth in embedded WebViews — open in system browser
+      // Google blocks OAuth in embedded WebViews — open in Chrome Custom Tab
       if (isGoogleAuthHost(hostname)) {
         pendingAuthRef.current = true;
-        RNLinking.openURL(reqUrl);
+        WebBrowser.openBrowserAsync(reqUrl, {
+          dismissButtonStyle: 'close',
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+        });
         return false;
       }
       // Allow Claude/Anthropic domains, block everything else
