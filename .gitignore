@@ -38,6 +38,7 @@ yarn-error.*
 # Secrets / credentials (Google Play, App Store)
 google-service-account.json
 serviceAccountKey*.json
+play-store-publisher-*.json
 credentials.json
 *.keystore
 
