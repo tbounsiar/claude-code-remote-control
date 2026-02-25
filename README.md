@@ -85,14 +85,7 @@ This will:
 2. Build a signed AAB (Play Store) and APK (sideload)
 3. Create a GitHub Release with both artifacts attached
 
-**Required GitHub Secrets:**
-
-| Secret | Description |
-|--------|-------------|
-| `KEYSTORE_BASE64` | Base64-encoded `.keystore` file |
-| `KEYSTORE_PASSWORD` | Keystore password |
-| `KEY_ALIAS` | Key alias |
-| `KEY_PASSWORD` | Key password |
+See the [workflow file](.github/workflows/build-android.yml) for required GitHub Secrets configuration.
 
 ## License
 
