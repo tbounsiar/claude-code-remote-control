@@ -23,12 +23,16 @@ Control your Claude Code sessions remotely from any mobile device.
 
 ## How It Works
 
-1. Run `claude` in your terminal with the `remote-control` flag
-2. A QR code appears in your terminal
+1. Start a Remote Control session:
+   - **New session:** run `claude remote-control` in your terminal
+   - **Existing session:** type `/remote-control` (or `/rc`) inside Claude Code
+2. A **session URL** appears in the terminal (press **Space** to show a QR code)
 3. Open **Claude Code Remote Control** on your phone
-4. **Scan the QR code** or **paste the URL** to connect
+4. **Scan the QR code** or **paste the session URL** to connect
 5. Interact with your Claude Code session from your phone
 6. Get **push notifications** when the session needs your input
+
+> See the [official Remote Control docs](https://code.claude.com/docs/en/remote-control) for full details.
 
 ### 📷 Quick Start — Scan from your browser
 
