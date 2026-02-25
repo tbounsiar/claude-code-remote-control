@@ -1,6 +1,7 @@
 # Claude Code Remote Control
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/tbounsiar/claude-code-remote-control/releases/tag/v1.0.0)
+[![Build Android](https://github.com/tbounsiar/claude-code-remote-control/actions/workflows/build-android.yml/badge.svg)](https://github.com/tbounsiar/claude-code-remote-control/actions/workflows/build-android.yml)
+[![Version](https://img.shields.io/github/v/release/tbounsiar/claude-code-remote-control)](https://github.com/tbounsiar/claude-code-remote-control/releases/latest)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey)](https://github.com/tbounsiar/claude-code-remote-control/releases)
 [![License](https://img.shields.io/github/license/tbounsiar/claude-code-remote-control)](LICENSE)
 
@@ -29,6 +30,17 @@ Control your Claude Code sessions remotely from any mobile device.
 5. Interact with your Claude Code session from your phone
 6. Get **push notifications** when the session needs your input
 
+### 📷 Quick Start — Scan from your browser
+
+An alternative to the `remote-control` terminal command:
+
+1. 🧩 Install the [QR Code Generator](https://chromewebstore.google.com/detail/qr-code-generator/afpbjjgbdimpioenaedcjgkaigggcdpp) Chrome extension
+2. 🌐 Open your Claude Code session in Chrome (`claude.ai/code`)
+3. 🔲 Click the QR Code Generator extension icon — it generates a QR code for the current URL
+4. 📱 Open **Claude Code Remote Control** on your phone
+5. 📸 Tap **Scan QR Code** and scan the QR code from your screen
+6. 🎉 You're connected — control your session from your phone!
+
 ## Requirements
 
 - A [Claude](https://claude.ai) subscription
@@ -52,10 +64,31 @@ npx expo start
 
 # TypeScript check
 npx tsc --noEmit
-
-# Build with EAS
-eas build --platform android --profile production
 ```
+
+## CI/CD — Automated Builds
+
+Android builds run automatically via **GitHub Actions** on every tag push (`v*`).
+
+**Trigger a new release:**
+```bash
+git tag v1.1.0
+git push --tags
+```
+
+This will:
+1. Run `expo prebuild` to generate the Android project
+2. Build a signed AAB (Play Store) and APK (sideload)
+3. Create a GitHub Release with both artifacts attached
+
+**Required GitHub Secrets:**
+
+| Secret | Description |
+|--------|-------------|
+| `KEYSTORE_BASE64` | Base64-encoded `.keystore` file |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEY_ALIAS` | Key alias |
+| `KEY_PASSWORD` | Key password |
 
 ## License
 

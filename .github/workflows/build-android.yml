@@ -1,0 +1,107 @@
+name: Build Android
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Expo prebuild
+        run: npx expo prebuild --platform android --clean
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+
+      - name: Configure release signing
+        run: |
+          # Patch build.gradle to use release keystore
+          cat > /tmp/signing-patch.py << 'PYEOF'
+          import re, sys
+          path = "android/app/build.gradle"
+          with open(path) as f:
+              content = f.read()
+
+          # Add release signing config
+          release_config = """
+          release {
+              storeFile file('release.keystore')
+              storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
+              keyAlias System.getenv('KEY_ALIAS') ?: ''
+              keyPassword System.getenv('KEY_PASSWORD') ?: ''
+          }"""
+
+          # Insert release config after debug config block
+          content = content.replace(
+              "        }\n    }\n    buildTypes {",
+              "        }\n" + release_config + "\n    }\n    buildTypes {"
+          )
+
+          # Use release signing for release builds
+          content = content.replace(
+              "signingConfig signingConfigs.debug\n            def enableShrinkResources",
+              "signingConfig signingConfigs.release\n            def enableShrinkResources"
+          )
+
+          with open(path, 'w') as f:
+              f.write(content)
+          print("Signing config patched successfully")
+          PYEOF
+          python3 /tmp/signing-patch.py
+
+      - name: Build release AAB
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease
+
+      - name: Build release APK
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Rename artifacts
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          cp android/app/build/outputs/bundle/release/app-release.aab claude-code-remote-control-${TAG}.aab
+          cp android/app/build/outputs/apk/release/app-release.apk claude-code-remote-control-${TAG}.apk
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          gh release create ${TAG} \
+            claude-code-remote-control-${TAG}.apk \
+            claude-code-remote-control-${TAG}.aab \
+            --title "${TAG} - Release" \
+            --generate-notes
