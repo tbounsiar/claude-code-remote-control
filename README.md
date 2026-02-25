@@ -15,7 +15,7 @@ Control your [Claude Code](https://code.claude.com) sessions remotely from any m
 
 | Platform | Status |
 |----------|--------|
-| **Android (APK)** | [**Download v1.0.0**](https://github.com/tbounsiar/claude-code-remote-control/releases/download/v1.0.0/claude-code-remote-control-v1.0.0.apk) |
+| **Android (APK)** | [**Download v1.1.0**](https://github.com/tbounsiar/claude-code-remote-control/releases/download/v1.1.0/claude-code-remote-control-v1.1.0.apk) |
 | **Google Play Store** | 🔜 Coming soon |
 | **Apple App Store** | 🔜 Coming soon |
 
@@ -45,9 +45,13 @@ An alternative to the `remote-control` terminal command:
 5. 📸 Tap **Scan QR Code** and scan the QR code from your screen
 6. 🎉 You're connected — control your session from your phone!
 
-## Known Limitations
+## Google Sign-In Workaround
 
-- **Google SSO authentication** is not yet supported inside the WebView. If your Claude account uses Google Sign-In, you'll need to log in via a regular browser first. A fix is coming soon.
+Google blocks OAuth inside WebViews. If your Claude account uses Google Sign-In:
+
+1. Open **Settings** (gear icon) and enable **Google Sign-In**
+2. Sessions will now open in your default browser instead of the in-app WebView
+3. You can turn it off anytime to go back to the in-app experience
 
 ## Requirements
 

@@ -11,15 +11,32 @@ export const NOTIFICATION_CHANNEL_NAME = 'Session Events';
 export const STORAGE_KEYS = {
   SESSIONS: '@sessions',
   THEME_PREFERENCE: '@theme_preference',
+  GOOGLE_AUTH_MODE: '@google_auth_mode',
 } as const;
 
-/** Check if a hostname belongs to an allowed domain (claude.ai or anthropic.com) */
+/** OAuth domains allowed inside the WebView for SSO flows */
+const OAUTH_HOSTS = [
+  'accounts.google.com',
+  'appleid.apple.com',
+  'login.microsoftonline.com',
+];
+
+/** Broader OAuth-related domain suffixes (Google redirects through several subdomains) */
+const OAUTH_DOMAIN_SUFFIXES = [
+  '.google.com',
+  '.googleapis.com',
+  '.gstatic.com',
+];
+
+/** Check if a hostname belongs to an allowed domain */
 export function isAllowedHost(hostname: string): boolean {
   return (
     hostname === CLAUDE_DOMAIN ||
     hostname.endsWith('.' + CLAUDE_DOMAIN) ||
     hostname === ANTHROPIC_DOMAIN ||
-    hostname.endsWith('.' + ANTHROPIC_DOMAIN)
+    hostname.endsWith('.' + ANTHROPIC_DOMAIN) ||
+    OAUTH_HOSTS.includes(hostname) ||
+    OAUTH_DOMAIN_SUFFIXES.some((suffix) => hostname.endsWith(suffix))
   );
 }
 

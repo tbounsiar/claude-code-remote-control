@@ -2,7 +2,7 @@
   "expo": {
     "name": "Claude Code Remote Control",
     "slug": "claude-code-remote-control",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -27,7 +27,7 @@
         "backgroundColor": "#0F0F0F"
       },
       "package": "com.tbsoft.claudecoderemotecontrol",
-      "versionCode": 1,
+      "versionCode": 2,
       "permissions": [
         "CAMERA",
         "VIBRATE",
@@ -71,7 +71,9 @@
           "icon": "./assets/icon.png",
           "color": "#D97706"
         }
-      ]
+      ],
+      "expo-web-browser",
+      "./plugins/withWebViewNoRequestedWith"
     ],
     "extra": {
       "eas": {

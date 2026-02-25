@@ -7,17 +7,20 @@ import {
   Alert,
   StyleSheet,
   Linking,
+  Switch,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { useTheme, type ThemePreference } from '../hooks/useTheme';
 import { useSessions } from '../hooks/useSessions';
+import { useGoogleAuthMode } from '../hooks/useGoogleAuthMode';
 
 export default function SettingsScreen() {
   const { colors, preference, setPreference } = useTheme();
   const insets = useSafeAreaInsets();
   const { clearAll } = useSessions();
+  const { googleAuthMode, toggleGoogleAuthMode } = useGoogleAuthMode();
 
   const themeOptions: { label: string; value: ThemePreference }[] = [
     { label: 'System', value: 'system' },
@@ -66,6 +69,29 @@ export default function SettingsScreen() {
               )}
             </TouchableOpacity>
           ))}
+        </View>
+
+        {/* Authentication */}
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          AUTHENTICATION
+        </Text>
+        <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.optionRow, { borderBottomWidth: 0 }]}>
+            <View style={styles.switchLabel}>
+              <Text style={[styles.optionLabel, { color: colors.text }]}>
+                Google Sign-In
+              </Text>
+              <Text style={[styles.optionHint, { color: colors.textSecondary }]}>
+                Opens sessions in your browser instead of the in-app WebView
+              </Text>
+            </View>
+            <Switch
+              value={googleAuthMode}
+              onValueChange={toggleGoogleAuthMode}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFF"
+            />
+          </View>
         </View>
 
         {/* Sessions */}
@@ -178,6 +204,14 @@ const styles = StyleSheet.create({
   checkmark: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  switchLabel: {
+    flex: 1,
+    marginRight: 12,
+  },
+  optionHint: {
+    fontSize: 12,
+    marginTop: 2,
   },
   chevron: {
     fontSize: 16,

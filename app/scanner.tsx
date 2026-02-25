@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Linking } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../hooks/useTheme';
+import { useGoogleAuthMode } from '../hooks/useGoogleAuthMode';
 import { addSession } from '../lib/storage';
 import { isValidClaudeUrl } from '../lib/constants';
 
@@ -12,6 +13,7 @@ export default function ScannerScreen() {
   const [scanned, setScanned] = useState(false);
   const scannedRef = useRef(false);
   const { colors } = useTheme();
+  const { googleAuthMode } = useGoogleAuthMode();
 
   const handleBarcodeScanned = useCallback(
     async ({ data }: { type: string; data: string }) => {
@@ -30,9 +32,14 @@ export default function ScannerScreen() {
         addedAt: Date.now(),
         label: 'Scanned Session',
       });
-      router.replace(`/session/${encodeURIComponent(data)}`);
+      if (googleAuthMode) {
+        Linking.openURL(data);
+        router.back();
+      } else {
+        router.replace(`/session/${encodeURIComponent(data)}`);
+      }
     },
-    []
+    [googleAuthMode]
   );
 
   if (!permission) {

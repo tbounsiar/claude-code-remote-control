@@ -9,11 +9,13 @@ import {
   Alert,
   StyleSheet,
   RefreshControl,
+  Linking,
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { useSessions } from '../hooks/useSessions';
+import { useGoogleAuthMode } from '../hooks/useGoogleAuthMode';
 import { SessionCard } from '../components/SessionCard';
 import { EmptyState } from '../components/EmptyState';
 import { CLAUDE_BASE_URL, isValidClaudeUrl } from '../lib/constants';
@@ -23,6 +25,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { sessions, loading, refresh, addSession, removeSession } = useSessions();
+  const { googleAuthMode } = useGoogleAuthMode();
 
   // Re-read sessions from storage when screen gains focus
   useFocusEffect(
@@ -34,8 +37,12 @@ export default function HomeScreen() {
   const [urlInput, setUrlInput] = useState('');
 
   const handleSessionPress = useCallback((session: Session) => {
-    router.push(`/session/${encodeURIComponent(session.url)}`);
-  }, []);
+    if (googleAuthMode) {
+      Linking.openURL(session.url);
+    } else {
+      router.push(`/session/${encodeURIComponent(session.url)}`);
+    }
+  }, [googleAuthMode]);
 
   const handleSessionLongPress = useCallback(
     (session: Session) => {
@@ -59,12 +66,20 @@ export default function HomeScreen() {
     await addSession({ url: sessionUrl, addedAt: Date.now() });
     setUrlInput('');
     setUrlModalVisible(false);
-    router.push(`/session/${encodeURIComponent(sessionUrl)}`);
-  }, [urlInput, addSession]);
+    if (googleAuthMode) {
+      Linking.openURL(sessionUrl);
+    } else {
+      router.push(`/session/${encodeURIComponent(sessionUrl)}`);
+    }
+  }, [urlInput, addSession, googleAuthMode]);
 
   const handleBrowseSessions = useCallback(() => {
-    router.push(`/session/${encodeURIComponent(CLAUDE_BASE_URL)}`);
-  }, []);
+    if (googleAuthMode) {
+      Linking.openURL(CLAUDE_BASE_URL);
+    } else {
+      router.push(`/session/${encodeURIComponent(CLAUDE_BASE_URL)}`);
+    }
+  }, [googleAuthMode]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>

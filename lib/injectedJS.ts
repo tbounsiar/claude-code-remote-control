@@ -4,6 +4,15 @@
  */
 export const INJECTED_JS_BEFORE_LOAD = `
   window.__CLAUDE_REMOTE_APP = true;
+
+  // Prevent Google from detecting WebView environment
+  Object.defineProperty(navigator, 'webdriver', { get: () => false });
+  delete navigator.__proto__.webdriver;
+
+  // Remove WebView-specific properties that Google checks
+  if (window.__gCrWeb) delete window.__gCrWeb;
+  if (window.__crWeb) delete window.__crWeb;
+
   true;
 `;
 
