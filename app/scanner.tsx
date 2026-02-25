@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
@@ -6,20 +6,31 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../hooks/useTheme';
 import { addSession } from '../lib/storage';
 
+function isValidClaudeUrl(raw: string): boolean {
+  try {
+    const parsed = new URL(raw);
+    return parsed.hostname === 'claude.ai' || parsed.hostname.endsWith('.claude.ai');
+  } catch {
+    return false;
+  }
+}
+
 export default function ScannerScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const scannedRef = useRef(false);
   const { colors } = useTheme();
 
   const handleBarcodeScanned = useCallback(
     async ({ data }: { type: string; data: string }) => {
-      if (scanned) return;
+      if (scannedRef.current) return;
 
-      if (!data.includes('claude.ai')) {
+      if (!isValidClaudeUrl(data)) {
         Alert.alert('Invalid QR Code', 'This is not a Claude Code session URL.');
         return;
       }
 
+      scannedRef.current = true;
       setScanned(true);
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await addSession({
@@ -29,7 +40,7 @@ export default function ScannerScreen() {
       });
       router.replace(`/session/${encodeURIComponent(data)}`);
     },
-    [scanned]
+    []
   );
 
   if (!permission) {

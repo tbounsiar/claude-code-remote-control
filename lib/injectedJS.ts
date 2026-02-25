@@ -40,12 +40,16 @@ export const INJECTED_JS_AFTER_LOAD = `
     });
   }
 
-  // 2. Observe DOM for session state changes
+  // 2. Observe DOM for session state changes and session list
   function observeSession() {
     var lastState = null;
-    function check() {
+    var debounceTimer = null;
+
+    function checkState() {
       var textarea = document.querySelector('textarea');
-      var waitingForInput = !!(textarea && !textarea.disabled);
+      var contentEditable = document.querySelector('[contenteditable="true"]');
+      var input = textarea || contentEditable;
+      var waitingForInput = !!(input && !input.disabled && input.getAttribute('aria-disabled') !== 'true');
       var stateKey = waitingForInput ? 'waiting' : 'busy';
       if (stateKey !== lastState) {
         lastState = stateKey;
@@ -57,19 +61,26 @@ export const INJECTED_JS_AFTER_LOAD = `
       }
     }
 
-    var observer = new MutationObserver(function() {
-      check();
-    });
+    function debouncedCheck() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() {
+        checkState();
+        parseSessionList();
+      }, 300);
+    }
+
+    var observer = new MutationObserver(debouncedCheck);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true
     });
     // Initial check
-    setTimeout(check, 500);
+    setTimeout(checkState, 500);
   }
 
   // 3. Parse session list from the page
+  var lastSessionCount = 0;
   function parseSessionList() {
     var links = document.querySelectorAll('a[href*="/code/"]');
     var sessions = [];
@@ -83,7 +94,8 @@ export const INJECTED_JS_AFTER_LOAD = `
         });
       }
     }
-    if (sessions.length > 0) {
+    if (sessions.length > 0 && sessions.length !== lastSessionCount) {
+      lastSessionCount = sessions.length;
       postMsg({ type: 'SESSION_LIST', sessions: sessions });
     }
   }

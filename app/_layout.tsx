@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Stack, router } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
+import { Stack, router, useNavigationContainerRef } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Linking from 'expo-linking';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,32 +12,41 @@ SplashScreen.preventAutoHideAsync();
 function RootLayoutInner() {
   const { dark, colors } = useTheme();
   useNotifications();
+  const navigationRef = useNavigationContainerRef();
+  const pendingUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     SplashScreen.hideAsync();
   }, []);
 
+  // Process a deep link URL once navigation is ready
+  const processUrl = async (url: string) => {
+    let sessionUrl: string | null = null;
+
+    if (url.startsWith('clauderemote://')) {
+      try {
+        const parsed = Linking.parse(url);
+        sessionUrl = parsed.queryParams?.url as string | null;
+      } catch {
+        // fallback
+      }
+    } else if (url.includes('claude.ai/code')) {
+      sessionUrl = url;
+    }
+
+    if (sessionUrl) {
+      await addSession({ url: sessionUrl, addedAt: Date.now() });
+      router.push(`/session/${encodeURIComponent(sessionUrl)}`);
+    }
+  };
+
   // Handle deep links
   useEffect(() => {
-    const handleUrl = async (event: { url: string }) => {
-      const url = event.url;
-      let sessionUrl: string | null = null;
-
-      if (url.startsWith('clauderemote://')) {
-        // Custom scheme: clauderemote://session?url=<encoded>
-        try {
-          const parsed = Linking.parse(url);
-          sessionUrl = parsed.queryParams?.url as string | null;
-        } catch {
-          // fallback
-        }
-      } else if (url.includes('claude.ai/code')) {
-        sessionUrl = url;
-      }
-
-      if (sessionUrl) {
-        await addSession({ url: sessionUrl, addedAt: Date.now() });
-        router.push(`/session/${encodeURIComponent(sessionUrl)}`);
+    const handleUrl = (event: { url: string }) => {
+      if (navigationRef.isReady()) {
+        processUrl(event.url);
+      } else {
+        pendingUrlRef.current = event.url;
       }
     };
 
@@ -50,6 +59,15 @@ function RootLayoutInner() {
 
     return () => subscription.remove();
   }, []);
+
+  // Process pending URL once navigation becomes ready
+  useEffect(() => {
+    if (navigationRef.isReady() && pendingUrlRef.current) {
+      const url = pendingUrlRef.current;
+      pendingUrlRef.current = null;
+      processUrl(url);
+    }
+  });
 
   return (
     <>
