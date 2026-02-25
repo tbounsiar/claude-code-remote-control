@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx expo start*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(eas *)",
+      "Bash(npm install*)",
+      "Bash(npm run *)",
+      "WebFetch(domain:expo.dev)",
+      "WebFetch(domain:docs.expo.dev)"
+    ]
+  }
+}
