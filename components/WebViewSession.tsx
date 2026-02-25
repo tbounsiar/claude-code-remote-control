@@ -75,6 +75,32 @@ export function WebViewSession({ url }: Props) {
     [url]
   );
 
+  const handleShouldStartLoad = useCallback(
+    (request: { url: string }) => {
+      const { url: reqUrl } = request;
+      // Google blocks OAuth in embedded WebViews — open in system browser
+      if (
+        reqUrl.includes('accounts.google.com') ||
+        reqUrl.includes('google.com/oauth') ||
+        reqUrl.includes('oauth2/auth')
+      ) {
+        RNLinking.openURL(reqUrl);
+        return false;
+      }
+      // Allow Claude/Anthropic domains, block everything else
+      if (
+        reqUrl.includes(CLAUDE_DOMAIN) ||
+        reqUrl.includes(ANTHROPIC_DOMAIN) ||
+        reqUrl.startsWith('about:')
+      ) {
+        return true;
+      }
+      RNLinking.openURL(reqUrl);
+      return false;
+    },
+    []
+  );
+
   const handleNavigationStateChange = useCallback(
     (navState: WebViewNavigation) => {
       const navUrl = navState.url || '';
@@ -125,6 +151,7 @@ export function WebViewSession({ url }: Props) {
         injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE_LOAD}
         injectedJavaScript={injectedAfterLoad}
         onMessage={handleMessage}
+        onShouldStartLoadWithRequest={handleShouldStartLoad}
         onNavigationStateChange={handleNavigationStateChange}
         onLoadStart={() => setLoading(true)}
         onLoadEnd={() => setLoading(false)}
