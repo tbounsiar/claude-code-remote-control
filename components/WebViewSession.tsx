@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, AppState, Linking as RNLinking, Platform } from 'react-native';
 import { WebView, type WebViewMessageEvent, type WebViewNavigation } from 'react-native-webview';
 import { useTheme } from '../hooks/useTheme';
@@ -33,6 +33,18 @@ export function WebViewSession({ url }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const lastNotifyRef = useRef<number>(0);
+  const pendingAuthRef = useRef(false);
+
+  // Reload WebView when user returns from system browser after OAuth
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active' && pendingAuthRef.current) {
+        pendingAuthRef.current = false;
+        webViewRef.current?.reload();
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   const injectedAfterLoad =
     INJECTED_JS_AFTER_LOAD + (dark ? '\n' + DARK_MODE_CSS_INJECTION : '');
@@ -93,6 +105,7 @@ export function WebViewSession({ url }: Props) {
 
       // Google blocks OAuth in embedded WebViews — open in system browser
       if (isGoogleAuthHost(hostname)) {
+        pendingAuthRef.current = true;
         RNLinking.openURL(reqUrl);
         return false;
       }
