@@ -45,6 +45,10 @@ An alternative to the `remote-control` terminal command:
 5. 📸 Tap **Scan QR Code** and scan the QR code from your screen
 6. 🎉 You're connected — control your session from your phone!
 
+## Known Limitations
+
+- **Google SSO authentication** is not yet supported inside the WebView. If your Claude account uses Google Sign-In, you'll need to log in via a regular browser first. A fix is coming soon.
+
 ## Requirements
 
 - A [Claude](https://claude.ai) subscription (Pro or Max plan)
