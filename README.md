@@ -5,7 +5,7 @@
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey)](https://github.com/tbounsiar/claude-code-remote-control/releases)
 [![License](https://img.shields.io/github/license/tbounsiar/claude-code-remote-control)](LICENSE)
 
-Control your Claude Code sessions remotely from any mobile device.
+Control your [Claude Code](https://code.claude.com) sessions remotely from any mobile device.
 
 <p align="center">
   <img src="assets/icon.png" width="120" alt="Claude Code Remote Control icon" />
@@ -19,7 +19,7 @@ Control your Claude Code sessions remotely from any mobile device.
 | **Google Play Store** | 🔜 Coming soon |
 | **Apple App Store** | 🔜 Coming soon |
 
-> **Note:** The APK is for sideloading on Android. You may need to enable "Install from unknown sources" in your device settings.
+> The APK is for sideloading on Android. You may need to enable "Install from unknown sources" in your device settings.
 
 ## How It Works
 
@@ -40,15 +40,15 @@ An alternative to the `remote-control` terminal command:
 
 1. 🧩 Install the [QR Code Generator](https://chromewebstore.google.com/detail/qr-code-generator/afpbjjgbdimpioenaedcjgkaigggcdpp) Chrome extension
 2. 🌐 Open your Claude Code session in Chrome (`claude.ai/code`)
-3. 🔲 Click the QR Code Generator extension icon — it generates a QR code for the current URL
+3. 🔲 Click the extension icon — it generates a QR code for the current URL
 4. 📱 Open **Claude Code Remote Control** on your phone
 5. 📸 Tap **Scan QR Code** and scan the QR code from your screen
 6. 🎉 You're connected — control your session from your phone!
 
 ## Requirements
 
-- A [Claude](https://claude.ai) subscription
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed on your computer
+- A [Claude](https://claude.ai) subscription (Pro or Max plan)
+- [Claude Code CLI](https://code.claude.com/docs/en/overview) installed on your computer
 - Android 7+ or iOS 15+ device
 
 ## Privacy
@@ -56,19 +56,6 @@ An alternative to the `remote-control` terminal command:
 Your sessions are loaded directly in an embedded browser on your device. No data passes through third-party servers.
 
 [Privacy Policy](https://tbounsiar.github.io/claude-code-remote-control/privacy-policy/)
-
-## Building from Source
-
-```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npx expo start
-
-# TypeScript check
-npx tsc --noEmit
-```
 
 ## License
 
