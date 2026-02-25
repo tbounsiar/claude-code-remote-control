@@ -70,23 +70,6 @@ npx expo start
 npx tsc --noEmit
 ```
 
-## CI/CD — Automated Builds
-
-Android builds run automatically via **GitHub Actions** on every tag push (`v*`).
-
-**Trigger a new release:**
-```bash
-git tag v1.1.0
-git push --tags
-```
-
-This will:
-1. Run `expo prebuild` to generate the Android project
-2. Build a signed AAB (Play Store) and APK (sideload)
-3. Create a GitHub Release with both artifacts attached
-
-See the [workflow file](.github/workflows/build-android.yml) for required GitHub Secrets configuration.
-
 ## License
 
 MIT
